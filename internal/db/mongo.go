@@ -11,25 +11,21 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
-
 const mongoConnUrl = ""
 
 var instance *MongoDBConnection
 var once sync.Once
 
-
-
 type MongoDBConnection struct {
 	client *mongo.Client
 	dbName string
-	mu sync.RWMutex
+	mu     sync.RWMutex
 }
-
 
 func (conn *MongoDBConnection) Connect(ctx context.Context, dbName string) error {
 	conn.mu.Lock()
 	defer conn.mu.Unlock()
-	
+
 	options := options.Client().ApplyURI(mongoConnUrl).SetMaxPoolSize(10).SetMinPoolSize(2).SetConnectTimeout(10 * time.Second).SetMaxConnIdleTime(5 * time.Minute).SetCompressors([]string{"zlib", "snappy"})
 
 	client, err := mongo.Connect(options)
@@ -37,10 +33,10 @@ func (conn *MongoDBConnection) Connect(ctx context.Context, dbName string) error
 		return fmt.Errorf("mongo.Connect: %w", err)
 	}
 
-	pingCtx, cancel := context.WithTimeout(ctx, 10 * time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	if err:= client.Ping(pingCtx, readpref.Primary()) ;err != nil {
+	if err := client.Ping(pingCtx, readpref.Primary()); err != nil {
 		client.Disconnect(ctx)
 		return fmt.Errorf("ping failed: %v", err)
 	}
@@ -49,7 +45,6 @@ func (conn *MongoDBConnection) Connect(ctx context.Context, dbName string) error
 	conn.client = client
 	return nil
 }
-
 
 func (conn *MongoDBConnection) Disconnect(ctx context.Context) error {
 	conn.mu.RLock()
@@ -60,25 +55,25 @@ func (conn *MongoDBConnection) Disconnect(ctx context.Context) error {
 	return conn.client.Disconnect(ctx)
 }
 
-
 func (conn *MongoDBConnection) Ping(ctx context.Context) error {
 	conn.mu.RLock()
 	defer conn.mu.RUnlock()
-	pingctx, cancel := context.WithTimeout(ctx, 10 * time.Second)
+	pingctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	if err:= conn.client.Ping(pingctx, readpref.Primary()); err != nil {
+	if err := conn.client.Ping(pingctx, readpref.Primary()); err != nil {
 		return fmt.Errorf("ping failed: %v", err)
 	}
 	return nil
 }
 
+func (conn *MongoDBConnection) GetCollection(ctx context.Context, name string) *mongo.Collection {
+	return conn.client.Database(conn.dbName).Collection(name)
+}
 
-func GetDB() *MongoDBConnection{
+func GetDB() *MongoDBConnection {
 	once.Do(func() {
 		instance = &MongoDBConnection{}
 	})
 	return instance
 }
-
-
