@@ -16,36 +16,21 @@ func (err Error) Error() string {
 }
 
 func ServerError(msg string, data any) (int, HttpResponse) {
-	return http.StatusInternalServerError, HttpResponse{
-		Message: msg,
-		Data:    data,
-	}
+	return GeneralResponse(false, msg, data, http.StatusInternalServerError)
 }
 
 func ValidationError(msg string, data any) (int, HttpResponse) {
-	return http.StatusBadRequest, HttpResponse{
-		Message: msg,
-		Data:    data,
-	}
+	return GeneralResponse(false, msg, data, http.StatusBadRequest)
 }
 
 func NotFoundError(msg string) (int, HttpResponse) {
-	return http.StatusNotFound, HttpResponse{
-		Message: msg,
-		Data:    nil,
-	}
+	return GeneralResponse(false, msg, nil, http.StatusNotFound)
 }
 
 func UnAuthorisedError(msg string) (int, HttpResponse) {
-	return http.StatusUnauthorized, HttpResponse{
-		Message: msg,
-		Data:    nil,
-	}
+	return GeneralResponse(false, msg, nil, http.StatusUnauthorized)
 }
 
 func NotAllowedError(msg string) (int, HttpResponse) {
-	return http.StatusForbidden, HttpResponse{
-		Message: msg,
-		Data:    nil,
-	}
+	return GeneralResponse(false, msg, nil, http.StatusForbidden)
 }
