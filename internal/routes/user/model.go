@@ -3,6 +3,7 @@ package user
 import (
 	"api/internal/db/users"
 
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -18,7 +19,7 @@ func (model UserModel) toDB() users.User {
 		Name:     model.Name,
 		Username: model.Username,
 		Dob:      model.Dob,
-		ID:       model.ID,
+		Id:       primitive.ObjectID(model.ID),
 	}
 }
 
