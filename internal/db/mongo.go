@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -12,7 +13,14 @@ import (
 )
 
 
-const mongoConnUrl = ""
+const defaultMongoConnUrl = "mongodb://localhost:27017"
+
+func mongoConnUrl() string {
+	if url := os.Getenv("MONGO_URI"); url != "" {
+		return url
+	}
+	return defaultMongoConnUrl
+}
 
 var instance *MongoDBConnection
 var once sync.Once
@@ -30,7 +38,7 @@ func (conn *MongoDBConnection) Connect(ctx context.Context, dbName string) error
 	conn.mu.Lock()
 	defer conn.mu.Unlock()
 	
-	options := options.Client().ApplyURI(mongoConnUrl).SetMaxPoolSize(10).SetMinPoolSize(2).SetConnectTimeout(10 * time.Second).SetMaxConnIdleTime(5 * time.Minute).SetCompressors([]string{"zlib", "snappy"})
+	options := options.Client().ApplyURI(mongoConnUrl()).SetMaxPoolSize(10).SetMinPoolSize(2).SetConnectTimeout(10 * time.Second).SetMaxConnIdleTime(5 * time.Minute).SetCompressors([]string{"zlib", "snappy"})
 
 	client, err := mongo.Connect(options)
 	if err != nil {
