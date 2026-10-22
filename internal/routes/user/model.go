@@ -1,24 +1,34 @@
 package user
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"api/internal/db/users"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 type UserModel struct {
-	Name string `bson:"name" json:"name"`
-	Username string `bson:"name" json:"username"`
-	Dob string `bson:"dob" json:"dob"`
-	ID bson.ObjectID `bson:"_id" json:"id"`
+	Name     string        `json:"name"`
+	Username string        `json:"username"`
+	Dob      string        `json:"dob"`
+	ID       bson.ObjectID `json:"id"`
+}
+
+func (model UserModel) toDB() users.User {
+	return users.User{
+		Name:     model.Name,
+		Username: model.Username,
+		Dob:      model.Dob,
+		ID:       model.ID,
+	}
 }
 
 type CreateUserModel struct {
-	Name string `json:"name" binding:"required"`
+	Name     string `json:"name" binding:"required"`
 	Username string `json:"username" binding:"required"`
-	Dob string `json:"dob"`
+	Dob      string `json:"dob"`
 }
 
 type PatchUserModel struct {
 	Name string `json:"name,omitempty"`
-	Dob string `json:"dob,omitempty"`
+	Dob  string `json:"dob,omitempty"`
 }
-
-
